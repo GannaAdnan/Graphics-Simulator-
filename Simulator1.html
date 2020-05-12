@@ -1,0 +1,274 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+
+	<head>
+		<title>Simulator</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+		<style>
+			body 
+			{
+				margin: 0px;
+				background-color: #ffffff;
+				overflow: hidden;
+			}
+
+		</style>
+	
+	</head>
+	
+	
+	<body>
+		<script src="build/three.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+
+
+
+		
+		<div style=" position: fixed; display: block;  left: 0%; top: 0%; color:white; font-size:18px;">
+		press A to change color <br>
+		press W to accelerate <br> 
+		press S to decelerate<br>
+		Right-Click To Scale Down <br>
+		Left-Click to Scale Up
+		</div>
+		
+		
+		<script>
+		
+	        //declare variables
+			var camera, scene, renderer,group,sphere;
+			var material,colorHSL = {};
+			var objectMaterial,groundMaterial;
+			var light1, light2, light3, light4;
+
+
+			var p,composer;
+			//call functions
+			init();
+			animate();
+
+		 
+			    function init() {
+				
+			// camera and scene
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera(70,window.innerWidth/window.innerHeight,0.1 ,2000);
+				camera.position.z=400;
+		        var control = new THREE.OrbitControls(camera);
+				scene.background = new THREE.Color( 'black' );
+
+			//Event Listeners
+			    document.addEventListener("keydown", onDocumentKeyDown);
+			    document.addEventListener( 'mousedown', onMouseDown );
+
+				
+       
+
+		//Textures
+
+			//background front
+			   	var texture = new THREE.TextureLoader().load('buck.jpg');
+				var geometry = new THREE.BoxBufferGeometry(window.innerWidth+3200, window.innerHeight+2000, 1500);
+				
+				var material = new THREE.MeshBasicMaterial({ map: texture });
+				mesh = new THREE.Mesh(geometry, material);
+				mesh.position.z = -1800;
+				scene.add(mesh);
+				
+			//background left
+				var texture = new THREE.TextureLoader().load('buck.jpg');
+				var geometry = new THREE.BoxBufferGeometry(1500, window.innerHeight + 2000, 1500);
+
+				var material = new THREE.MeshBasicMaterial({ map: texture });
+				mesh2 = new THREE.Mesh(geometry, material);
+				mesh2.position.x = -2850;
+				scene.add(mesh2);
+				
+			//background right
+				var texture = new THREE.TextureLoader().load('buck.jpg');
+				var geometry = new THREE.BoxBufferGeometry(1500, window.innerHeight + 2000, 1500);
+
+				var material = new THREE.MeshBasicMaterial({ map: texture });
+				mesh3 = new THREE.Mesh(geometry, material);
+				mesh3.position.x = 2855;
+				scene.add(mesh3);
+			
+				
+        
+
+			//Box
+				const width = 100;
+				const height = 100;
+				const depth = 50;
+				var objectGeometry = new THREE.BoxBufferGeometry( width, height, depth );
+				objectMaterial = new THREE.MeshStandardMaterial( { color: 'white', roughness: 0.5, metalness: 1.0 } );
+				objectMaterial.color.getHSL(); //to change color
+
+						
+				group = new THREE.Group();
+
+			//Loop to create many boxes in random places
+					
+		            for ( var i = 0; i < 650; i ++ ) {
+					 
+					var mesh = new THREE.Mesh( objectGeometry, objectMaterial );
+
+					mesh.position.x = Math.random() *2000-1000;
+					mesh.position.y = Math.random() *2000-1000;
+					mesh.position.z = Math.random() *2000-1000;
+					mesh.rotation.x = Math.random()  * Math.PI;
+					mesh.rotation.y = Math.random()  * Math.PI;
+
+					
+					group.add( mesh );
+				}
+				
+				//Scale of Boxes
+					group.scale.x=0.5;
+					group.scale.y=0.5;
+					group.scale.z=0.5;
+					scene.add( group );
+               
+			   
+				//Point Light from Spheres
+					var intensity = 2.5;
+					var distance = 300;
+					var decay = 2.0;
+					var color1 = "crimson", color2 = "cyan", color3 = "purple",color4 = "blue";
+				//sphere
+					sphere = new THREE.SphereBufferGeometry( 2, 2, 2 );
+					
+				//lights and adding spheres to them
+					light1 = new THREE.PointLight( color1, intensity, distance, decay );
+					light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: color1 } ) ) );
+					scene.add( light1 );
+					light2 = new THREE.PointLight( color2, intensity, distance, decay );
+					light2.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: color2 } ) ) );
+					scene.add( light2 );
+					light3 = new THREE.PointLight( color3, intensity, distance, decay );
+					light3.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: color3 } ) ) );
+					scene.add( light3 );
+					light4 = new THREE.PointLight( color4, intensity, distance, decay );
+					light4.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: color4 } ) ) );
+					scene.add( light4 );
+				
+				//Directional Light
+					var dlight = new THREE.DirectionalLight( 0xffffff, 1 );
+					dlight.position.set( 1, 1, 1 );
+					scene.add( dlight );
+				
+				//positions of PointLight and Spheres
+					light1.position.x = -200;
+					light1.position.z = -100;
+					
+					light2.position.x = 150;
+					light2.position.z = -50;
+					
+					light3.position.x = 250;
+					light3.position.z = -100;
+					
+					light4.position.x = -50;
+					light4.position.z = -50;
+
+
+
+
+				//render
+					renderer = new THREE.WebGLRenderer();
+					renderer.setPixelRatio(window.devicePixelRatio);
+					renderer.setSize(window.innerWidth, window.innerHeight);
+					document.body.appendChild(renderer.domElement);
+      
+
+}
+				//Functions
+				
+				// Keys to speed up, speed down, change color
+				  function onDocumentKeyDown(event)
+				{
+
+					var keyCode = event.which;
+					if (keyCode == 87) //W
+					{    
+						speedup();
+					}  
+					else if(keyCode == 83) //S
+					{  
+					   speeddown();
+					}
+					
+					else if(keyCode == 65)  //A
+					{  
+				
+		        		 objectMaterial.color.setHSL( Math.random() , Math.random() , Math.random()  );
+						
+					}
+				};
+				 
+				// Keys to scale up and down
+				 function onMouseDown( event ) 
+				{
+
+  
+					   switch ( event.which ) 
+					   {
+						case 1: // left mouse click
+						
+							
+							group.scale.x+=0.1;
+							group.scale.z+=0.1;
+							group.scale.y+=0.1;
+        
+                            break;
+      
+						case 3: // right mouse click
+							group.scale.x-=0.1;
+							group.scale.z-=0.1;
+							group.scale.y-=0.1;
+							
+						    break;
+					   }
+
+				}
+				
+				function animate() 
+				{
+					//start with rotation
+				    group.rotation.x+=0.02;
+
+					renderer.render(scene, camera);
+					requestAnimationFrame(animate);
+
+				}
+				
+				//speed up function
+				function speedup() 
+				{
+
+					group.rotation.x+=0.02;
+					
+					requestAnimationFrame(speedup);
+					 
+			   
+				}
+				//speed down function
+				function speeddown()
+				{
+
+					  group.rotation.x-=0.02;
+					  
+					  requestAnimationFrame(speeddown);
+
+				}
+				
+			
+			
+
+
+		</script>
+
+	</body>
+</html>
